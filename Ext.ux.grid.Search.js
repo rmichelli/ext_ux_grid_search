@@ -65,7 +65,7 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
      */
 
     /**
-     * @cfg {String} searchText Text to display on menu button
+     * @cfg {String} searchText Text to display on menu button, set to '' to enable single select where grid header label of checked index will be displayed
      */
      searchText:'Search'
 
@@ -78,6 +78,17 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
      * @cfg {String} selectAllText Text to display on menu item that selects all fields
      */
     ,selectAllText:'Select All'
+
+    /**
+     * @cfg {Object} (optional) menuBtnConfig Config for menu button, should be valid argument for Ext.Button
+     * text config item is unavailable, use searchText instead
+     */
+    ,menuBtnConfig: {}
+
+    /**
+     * @cfg {Boolean} mapIndices True to use grid store's field mapping for server request instead of dataIndex
+     */
+    ,mapIndices: false
 
     /**
      * @cfg {String} position Where to display the search controls. Valid values are top and bottom
@@ -237,11 +248,19 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
         }
 
         // add menu button
-        tb.add({
-             text:this.searchText
-            ,menu:this.menu
-            ,iconCls:this.iconCls
-        });
+        // set menu button text - searchText if present, otherwise use grid header label of first checked index
+        this.menuBtnConfig = Ext.applyIf({ text: this.searchText || this.grid.colModel.config[this.grid.colModel.findColumnIndex(this.checkIndexes[0])].header }, this.menuBtnConfig);
+        this.menuBtnConfig = Ext.apply(this.menuBtnConfig, { menu: this.menu });
+        tb.add(this.menuBtnConfig);
+        // if not using searchText, add listener to update menu button text on itemclick
+        if (!this.searchText) {
+            var _menuButton = tb.items.last();
+
+            this.menu.on('itemclick', function (menuItem, e) {
+                _menuButton.setText(menuItem.text);
+            },
+            this, { buffer: 250 });
+        }
 
         // add input field (TwinTriggerField in fact)
         this.field = new Ext.form.TwinTriggerField({
@@ -390,7 +409,7 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
             var fields = [];
             this.menu.items.each(function(item) {
                 if(item.checked) {
-                    fields.push(item.dataIndex);
+                    fields.push(item.mapping || item.dataIndex);    // use mapping if present
                 }
             });
 
@@ -404,6 +423,11 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
             if(fields.length) {
                 store.baseParams[this.paramNames.fields] = Ext.encode(fields);
                 store.baseParams[this.paramNames.query] = val;
+            }
+
+            // cancel any existing load requests
+            if (this.grid.store.proxy.conn.isLoading()) {
+                this.grid.store.proxy.conn.abort();
             }
 
             // reload store
@@ -480,13 +504,13 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
                     disable = disable ? disable : item === config.dataIndex;
                 });
                 if(!disable) {
-                    menu.add(new Ext.menu.CheckItem({
-                         text:config.header
-                        ,hideOnClick:false
-                        ,group:group
-                        ,checked:'all' === this.checkIndexes
-                        ,dataIndex:config.dataIndex
-                    }));
+                    menu.add(new Ext.menu.CheckItem(Ext.apply({
+                        text: config.header
+                        , hideOnClick: !this.searchText
+                        , group: group
+                        , checked: 'all' === this.checkIndexes
+                        , dataIndex: config.dataIndex
+                    }, this.mapIndices === true ? { mapping: this.grid.store.fields.map[config.dataIndex].mapping } : {})));    // include store mapping if requested
                 }
             }
         }, this);
@@ -524,3 +548,5 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
 }); // eo extend
 
 // eof
+
+Ext.reg('gridsearch', Ext.ux.grid.Search);
