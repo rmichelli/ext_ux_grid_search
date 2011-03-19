@@ -1,18 +1,13 @@
-Extjs extension - Ext.ux.gird.search
+Extjs extension - Ext.ux.grid.search
 
 Original code from: http://gridsearch.extjs.eu/
 
 Repo includes the following modifications:
 
-1.  Single Select - if searchText is '', on item selection the menu will close and set the button text
-    to the text of item selected
+1.  Single Select - if searchText is '', on item selection the menu will close and set the button text to the text of item selected
 
 2.  menuBtnConfig - accepts a menuBtnConfig (Ext.button config object) which is applied to the menu button
 
 3.  mapIndices - accepts a mapIndices flag which will use field's mapping value for the server request
 
 4.  cancel existing requests - when a new request is made, any existing request is aborted
-
-TO DO:
-
-1.  On filter button selection change, ensure store params are updated so a refresh will reflect the current filter selection
