@@ -13,7 +13,7 @@
  * <li>6. February 2009</li>
  * </ul>
  * @version   1.1.1
- * @revision  $Id: Ext.ux.grid.Search.js 798 2010-01-17 00:46:57Z jozo $
+ * @revision  $Id: Ext.ux.grid.Search.js 798(modified) 2010-01-17 00:46:57Z jozo $
  *
  * @license Ext.ux.grid.Search is licensed under the terms of
  * the Open Source LGPL 3.0 license.  Commercial use is permitted to the extent
