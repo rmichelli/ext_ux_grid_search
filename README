@@ -10,4 +10,4 @@ Repo includes the following modifications:
 
 3.  mapIndices - accepts a mapIndices flag which will use field's mapping value for the server request
 
-4.  cancel existing requests - when a new request is made, any existing request is aborted
+4.  abortExistingOnSearch - aborts any existing requests proxy when search is triggered

@@ -91,6 +91,11 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
     ,mapIndices: false
 
     /**
+     * @cfg {Boolean} abortExistingOnSearch True to cancel any existing proxy request when the search is triggered (defaults to true)
+     */
+    ,abortExistingOnSearch: true
+
+    /**
      * @cfg {String} position Where to display the search controls. Valid values are top and bottom
      * Corresponding toolbar has to exist at least with mimimum configuration tbar:[] for position:top or bbar:[]
      * for position bottom. Plugin does NOT create any toolbar.(defaults to "bottom")
@@ -425,8 +430,8 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
                 store.baseParams[this.paramNames.query] = val;
             }
 
-            // cancel any existing load requests
-            if (this.grid.store.proxy.conn.isLoading()) {
+            // cancel any existing load requests if configured to
+            if (this.abortExistingOnSearch && this.grid.store.proxy.conn.isLoading()) {
                 this.grid.store.proxy.conn.abort();
             }
 
