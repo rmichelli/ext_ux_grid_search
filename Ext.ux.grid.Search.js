@@ -161,6 +161,11 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
     ,minCharsTipText:'Type at least {0} characters'
 
     /**
+     * @cfg {Number} searchDelay Delay (ms) before starting search after typing begins (defaults to 500)
+     */
+    ,searchDelay: 300
+
+    /**
      * @cfg {String} mode Use 'remote' for remote stores or 'local' for local stores. If mode is local
      * no data requests are sent to server the grid's store is filtered instead (defaults to "remote")
      */
@@ -289,7 +294,7 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
             }
 
             if(this.minChars) {
-                this.field.el.on({scope:this, buffer:300, keyup:this.onKeyUp});
+                this.field.el.on({scope:this, buffer:this.searchDelay, keyup:this.onKeyUp});
             }
 
             // install key map
