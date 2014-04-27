@@ -205,7 +205,7 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
     ,shortcutModifier:'alt'
 
     /**
-     * @cfg {String} align "left" or "right" (defaults to "left")
+     * @cfg {String/Number} align "left", "right", or index at which to insert search items in designated tbar (defaults to "left")
      */
 
     /**
@@ -242,35 +242,29 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
      * @private
      */
     ,onRender:function() {
-        var panel = this.toolbarContainer || this.grid;
-        var tb = 'bottom' === this.position ? panel.bottomToolbar : panel.topToolbar;
+        var panel = this.toolbarContainer || this.grid,
+            tb = 'bottom' === this.position ? panel.bottomToolbar : panel.topToolbar,
+            tbCount = tb.items.getCount(),
+            tbItems = [];
+
         // add menu
         this.menu = new Ext.menu.Menu();
 
         // handle position
         if('right' === this.align) {
-            tb.addFill();
+            tbItems.push('->');
         }
         else {
-            if(0 < tb.items.getCount()) {
-                tb.addSeparator();
+            if(0 < tbCount) {
+                tbItems.push('-');
             }
         }
 
         // add menu button
         // set menu button text - searchText if present, otherwise use grid header label of first checked index
         this.menuBtnConfig = Ext.applyIf({ text: this.searchText || this.grid.colModel.config[this.grid.colModel.findColumnIndex(this.checkIndexes[0])].header }, this.menuBtnConfig);
-        this.menuBtnConfig = Ext.apply(this.menuBtnConfig, { menu: this.menu });
-        tb.add(this.menuBtnConfig);
-        // if not using searchText, add listener to update menu button text on itemclick
-        if (!this.searchText) {
-            var _menuButton = tb.items.last();
-
-            this.menu.on('itemclick', function (menuItem, e) {
-                _menuButton.setText(menuItem.text);
-            },
-            this, { buffer: 250 });
-        }
+        this.menuBtnConfig = Ext.apply(this.menuBtnConfig, { menu: this.menu, ref: 'searchMenuBtn' });
+        tbItems.push(this.menuBtnConfig);
 
         // add input field (TwinTriggerField in fact)
         this.field = new Ext.form.TwinTriggerField({
@@ -310,7 +304,24 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
             map.stopEvent = true;
         }, this, {single:true});
 
-        tb.add(this.field);
+        tbItems.push(this.field);
+
+        // if align is provided as a number, place toolbar items starting at that index, otherwise add all items to end
+        if(Ext.isNumber(this.align) && this.align < tbCount) {
+            Ext.each(tbItems, function (item, index) {
+                tb.insert(this.align + index, item);
+            }, this);
+        }
+        else {
+            tb.add(tbItems);
+        }
+
+        // if not using searchText, add listener to update menu button text on itemclick
+        if(!this.searchText) {
+            this.menu.on('itemclick', function (menuItem, e) {
+                tb.searchMenuBtn.setText(menuItem.text);
+            }, this, { buffer: 250 });
+        }
 
         // re-layout the panel if the toolbar is outside
         if(panel !== this.grid) {

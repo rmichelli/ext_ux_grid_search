@@ -10,4 +10,8 @@ Repo includes the following modifications:
 
 3.  mapIndices - accepts a mapIndices flag which will use field's mapping value for the server request
 
-4.  abortExistingOnSearch - aborts any existing requests proxy when search is triggered
+4.  abortExistingOnSearch - aborts any existing request's proxy when search is triggered
+
+-Note: any following updates are ExtJS 3.4 only
+
+5.  align - accepts a number argument that indicates the toolbar item index at which to insert the gridsearch items.  Original 'left' and 'right' behavior is maintained.
